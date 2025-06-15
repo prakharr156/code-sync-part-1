@@ -78,14 +78,14 @@ const server = http.createServer(app);
 // Configure CORS for Socket.IO
 const io = new Server(server, {
     cors: {
-        origin: ["http://localhost:3000","https://code-sync-part-1-1.onrender.com/"], // Your React app URL
+        origin: ["http://localhost:3000","https://code-sync-part-1-1.onrender.com"], // Your React app URL
         methods: ["GET", "POST"]
     }
 });
 
 // Enable CORS for Express
 app.use(cors({
-    origin: ["http://localhost:3000","https://code-sync-part-1-1.onrender.com/"],
+    origin: ["http://localhost:3000","https://code-sync-part-1-1.onrender.com"],
     credentials: true
 }));
 

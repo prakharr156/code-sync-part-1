@@ -9,7 +9,11 @@ const Login = () => {
 
   const handleLogin = async () => {
     try {
-      const res = await axios.post('http://localhost:4000/api/v1/auth/login', { email, password }, { withCredentials: true });
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:4000';
+      console.log('Backend URL:', backendUrl); // For debugging
+      
+      const res = await axios.post(
+        `${backendUrl}/api/v1/auth/login`, { email, password }, { withCredentials: true });
       if (res.data.success) {
         navigate('/home');
       }

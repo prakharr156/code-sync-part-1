@@ -8,7 +8,10 @@ const Signup = () => {
 
   const handleSignup = async () => {
     try {
-      const res = await axios.post('http://localhost:4000/api/v1/auth/signup', form);
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:4000';
+      
+      const res = await axios.post(
+        `${backendUrl}/api/v1/auth/signup`,  form);
       if (res.data.success) {
         navigate('/login');
       }

@@ -10,6 +10,8 @@
 //     return io(process.env.REACT_APP_BACKEND_URL, options);
 // };
 
+import io from 'socket.io-client';
+
 export const initSocket = async () => {
     const options = {
         'force new connection': true,
@@ -18,6 +20,5 @@ export const initSocket = async () => {
         transports: ['websocket'],
     };
     
-    // Connect to same domain where frontend is served
     return io(window.location.origin, options);
 };

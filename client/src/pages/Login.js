@@ -33,14 +33,21 @@
 // };
 
 // export default Login;
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+
+
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Get redirect path from query param
+  const searchParams = new URLSearchParams(location.search);
+  const redirectPath = searchParams.get('redirect') || '/home';
 
   const handleLogin = async () => {
     try {
@@ -53,9 +60,8 @@ const Login = () => {
       );
 
       if (res.data.success) {
-        // ✅ Backend should have set the token in the cookie
-        // Now protected route can use that cookie for verification
-        navigate('/home');
+        // Redirect to original page or home
+        navigate(redirectPath);
       } else {
         alert(res.data.message || 'Login failed');
       }

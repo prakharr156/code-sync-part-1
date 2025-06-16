@@ -15,7 +15,7 @@ router.get("/test", auth, (req, res) => {
     });
 });
 // In your backend - routes/auth.js or similar
-router.get('/verify', authenticateToken, (req, res) => {
+router.get('/verify', auth, (req, res) => {
   res.json({ 
     success: true, 
     user: req.user 

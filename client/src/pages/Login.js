@@ -80,7 +80,7 @@ const Login = () => {
           required 
         />
         {error && <div className="error" style={{color: 'red', margin: '10px 0'}}>{error}</div>}
-        <button type="submit" disabled={loading}>
+        <button type="submit" disabled={loading} >
           {loading ? 'Logging in...' : 'Login'}
         </button>
       </form>

@@ -44,7 +44,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, connectionError, retryConnection } = useAuth();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -60,6 +60,41 @@ const Login = () => {
     
     setLoading(false);
   };
+
+  const handleRetryConnection = async () => {
+    try {
+      await retryConnection();
+    } catch (error) {
+      console.error('Retry failed:', error);
+    }
+  };
+
+  // Show connection error if server is unreachable
+  if (connectionError) {
+    return (
+      <div className="authForm">
+        <h2>Connection Error</h2>
+        <div className="error" style={{color: 'red', margin: '10px 0', textAlign: 'center'}}>
+          <p>Cannot connect to server:</p>
+          <p>{connectionError}</p>
+          <button 
+            onClick={handleRetryConnection}
+            style={{
+              marginTop: '10px',
+              padding: '8px 16px',
+              backgroundColor: '#007bff',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer'
+            }}
+          >
+            Retry Connection
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="authForm">

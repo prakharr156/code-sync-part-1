@@ -57,50 +57,6 @@ import { v4 as uuidV4 } from 'uuid';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import '../styles/App.css';
-import axios from 'axios';
-
-
-
-const LogoutButton = () => {
-  const navigate = useNavigate();
-
-  const handleLogout = async () => {
-    try {
-      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:4000';
-      
-      await axios.post(
-        `${backendUrl}/api/v1/auth/logout`,
-        {},
-        { withCredentials: true }
-      );
-      
-      // Navigate to login page
-      navigate('/login');
-    } catch (error) {
-      console.error('Logout error:', error);
-      // Even if logout fails on backend, redirect to login
-      navigate('/login');
-    }
-  };
-
-  return (
-    <button 
-      onClick={handleLogout}
-      style={{
-        padding: '8px 16px',
-        backgroundColor: '#dc3545',
-        color: 'white',
-        border: 'none',
-        borderRadius: '4px',
-        cursor: 'pointer'
-      }}
-    >
-      Logout
-    </button>
-  );
-};
-
-
 
 const Home = () => {
     const navigate = useNavigate();
@@ -174,16 +130,6 @@ const Home = () => {
                             new room
                         </a>
                     </span>
-
-
-
-                    <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px' }}>
-        <h1>Welcome to Home</h1>
-        <LogoutButton />
-      </header>
-
-
-
                 </div>
             </div>
         </div>

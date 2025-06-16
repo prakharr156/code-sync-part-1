@@ -5,6 +5,7 @@ const { auth } = require("../middleware/auth");
 
 router.post("/login", login);
 router.post("/signup", signup);
+router.post("/logout", logout); // 🆕 ADD THIS ROUTE
 
 // Test Protected Route
 router.get("/test", auth, (req, res) => {

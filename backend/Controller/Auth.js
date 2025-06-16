@@ -75,3 +75,27 @@ exports.login = async (req, res) => {
         return res.status(500).json({ success: false, message: "Login failed" });
     }
 };
+
+
+
+
+
+
+
+exports.logout = async (req, res) => {
+    try {
+        const options = {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax'
+        };
+
+        return res.clearCookie("token", options).status(200).json({
+            success: true,
+            message: "User logged out successfully"
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ success: false, message: "Logout failed" });
+    }
+};

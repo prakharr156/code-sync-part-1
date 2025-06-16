@@ -14,5 +14,11 @@ router.get("/test", auth, (req, res) => {
         user: req.user
     });
 });
-
+// In your backend - routes/auth.js or similar
+router.get('/verify', authenticateToken, (req, res) => {
+  res.json({ 
+    success: true, 
+    user: req.user 
+  });
+});
 module.exports = router;

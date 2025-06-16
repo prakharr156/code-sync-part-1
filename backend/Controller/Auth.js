@@ -62,7 +62,9 @@ exports.login = async (req, res) => {
                 success: true,
                 token,
                 user,
-                message: "User logged in successfully"
+                message: "User logged in successfully",
+                 secure: true,           // required for HTTPS (Render)
+                sameSite: 'None'
             });
         } else {
             return res.status(403).json({ success: false, message: "Incorrect password" });

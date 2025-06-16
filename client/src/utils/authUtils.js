@@ -78,20 +78,27 @@ export const authUtils = {
    * Verify if user is authenticated
    * @returns {Promise<object|null>} User object if authenticated, null otherwise
    */
-  verifyAuth: async () => {
-    try {
-      const response = await api.get('/api/v1/auth/verify');
-      
-      // Additional verification of response structure
-      if (response.data?.success && response.data.user) {
-        return response.data.user;
-      }
-      return null;
-    } catch (error) {
-      console.error('Auth verification error:', error);
+  // Enhanced verifyAuth function
+verifyAuth: async () => {
+  try {
+    const response = await api.get('/api/v1/auth/verify');
+    
+    if (response.status === 401) {
+      // Clear any invalid tokens
+      document.cookie = 'token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
       return null;
     }
-  },
+    
+    if (!response.data?.success) {
+      throw new Error('Verification failed');
+    }
+    
+    return response.data.user;
+  } catch (error) {
+    console.error('Auth verification error:', error);
+    return null;
+  }
+},
 
   /**
    * Login user

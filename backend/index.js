@@ -10,7 +10,8 @@ app.use(cors({
     origin: ["http://localhost:3000","https://code-sync-part-1-1.onrender.com"], // Your frontend URL
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    exposedHeaders: ['set-cookie']
   }));
 app.use(express.json());
 app.use(cookieParser());

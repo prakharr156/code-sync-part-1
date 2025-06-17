@@ -4,6 +4,7 @@ import { v4 as uuidV4 } from 'uuid';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import '../styles/App.css';
+import axios from 'axios';
 
 const Home = () => {
     const navigate = useNavigate();

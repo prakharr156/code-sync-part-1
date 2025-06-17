@@ -56,17 +56,13 @@ exports.login = async (req, res) => {
             const options = {
                 expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
                 httpOnly: true,
-                secure: true,           // required for HTTPS (Render)
-                sameSite: 'None'
             };
 
             return res.cookie("token", token, options).status(200).json({
-                // httpOnly:true,
                 success: true,
                 token,
                 user,
-                message: "User logged in successfully",
-                 
+                message: "User logged in successfully"
             });
         } else {
             return res.status(403).json({ success: false, message: "Incorrect password" });
@@ -75,29 +71,5 @@ exports.login = async (req, res) => {
     } catch (err) {
         console.error(err);
         return res.status(500).json({ success: false, message: "Login failed" });
-    }
-};
-
-
-
-
-
-
-
-exports.logout = async (req, res) => {
-    try {
-        const options = {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax'
-        };
-
-        return res.clearCookie("token", options).status(200).json({
-            success: true,
-            message: "User logged out successfully"
-        });
-    } catch (err) {
-        console.error(err);
-        return res.status(500).json({ success: false, message: "Logout failed" });
     }
 };

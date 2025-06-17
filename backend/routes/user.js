@@ -14,5 +14,18 @@ router.get("/test", auth, (req, res) => {
         user: req.user
     });
 });
+router.get('/logout', (req, res) => {
+  res.clearCookie('token', {
+    httpOnly: true,
+    sameSite: "None",
+    secure: true
+  });
+
+  return res.status(200).json({
+    success: true,
+    message: "Logged out successfully",
+  });
+});
+
 
 module.exports = router;

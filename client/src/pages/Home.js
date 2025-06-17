@@ -8,6 +8,26 @@ import '../styles/App.css';
 const Home = () => {
     const navigate = useNavigate();
     
+
+
+
+    
+  const handleLogout = async () => {
+    try {
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:4000';
+      await axios.get(`${backendUrl}/api/v1/auth/logout`, {
+        withCredentials: true,
+      });
+      navigate("/login");
+    } catch (err) {
+      console.error("Logout failed:", err);
+    }
+  };
+
+
+
+
+
     const [roomId, setRoomId] = useState('');
     const [username, setUsername] = useState('');
 
@@ -77,6 +97,9 @@ const Home = () => {
                             new room
                         </a>
                     </span>
+                    <button onClick={handleLogout} className="btn logoutBtn">
+                      Logout
+                      </button>
                 </div>
             </div>
         </div>

@@ -3,8 +3,10 @@ const express = require('express');
 const router = express.Router();
 require('dotenv').config();
 
+// Correct import for the newer @google/genai package
 const { GoogleGenAI } = require('@google/genai');
 
+// Initialize with correct structure
 const ai = new GoogleGenAI({ apiKey: process.env.AI_API_KEY });
 
 router.post('/suggest', async (req, res) => {
@@ -15,11 +17,18 @@ router.post('/suggest', async (req, res) => {
   }
 
   try {
-    const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
+    // Use the newer API structure with ai.models.generateContent
+    const response = await ai.models.generateContent({
+      model: "gemini-1.5-flash", // or "gemini-2.5-flash" if available
+      contents: prompt,
+      config: {
+        thinkingConfig: {
+          thinkingBudget: 0, // Disables thinking for faster responses
+        }
+      }
+    });
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
+    const text = response.text;
 
     return res.json({ success: true, suggestion: text });
   } catch (err) {

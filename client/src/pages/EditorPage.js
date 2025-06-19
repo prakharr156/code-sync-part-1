@@ -244,7 +244,7 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import toast from 'react-hot-toast';
 import axios from 'axios';
-import Editor from './Editor'; // Import your CodeMirror Editor component
+import Editor from '../components/Editor';
 
 const ACTIONS = {
     JOIN: 'join',

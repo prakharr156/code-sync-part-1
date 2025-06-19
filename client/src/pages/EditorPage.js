@@ -489,165 +489,372 @@
 
 
 
+// import React, { useState, useRef, useEffect } from 'react';
+// import toast from 'react-hot-toast';
+// import ACTIONS from '../Actions';
+// import Client from '../components/Client';
+// import Editor from '../components/Editor';
+// import { initSocket } from '../socket';
+// import {
+//     useLocation,
+//     useNavigate,
+//     Navigate,
+//     useParams,
+// } from 'react-router-dom';
+// import axios from 'axios';
+
+// const EditorPage = () => {
+//     const socketRef = useRef(null);
+//     const codeRef = useRef(null);
+//     const location = useLocation();
+//     const { roomId } = useParams();
+//     const reactNavigator = useNavigate();
+//     const [clients, setClients] = useState([]);
+
+//     useEffect(() => {
+//         const init = async () => {
+//             socketRef.current = await initSocket();
+//             socketRef.current.on('connect_error', (err) => handleErrors(err));
+//             socketRef.current.on('connect_failed', (err) => handleErrors(err));
+
+//             function handleErrors(e) {
+//                 console.log('socket error', e);
+//                 toast.error('Socket connection failed, try again later.');
+//                 reactNavigator('/');
+//             }
+
+//             socketRef.current.emit(ACTIONS.JOIN, {
+//                 roomId,
+//                 username: location.state?.username,
+//             });
+
+//             // Listening for joined event
+//             socketRef.current.on(
+//                 ACTIONS.JOINED,
+//                 ({ clients, username, socketId }) => {
+//                     if (username !== location.state?.username) {
+//                         toast.success(`${username} joined the room.`);
+//                         console.log(`${username} joined`);
+//                     }
+//                     setClients(clients);
+//                     socketRef.current.emit(ACTIONS.SYNC_CODE, {
+//                         code: codeRef.current,
+//                         socketId,
+//                     });
+//                 }
+//             );
+
+//             // Listening for disconnected
+//             socketRef.current.on(
+//                 ACTIONS.DISCONNECTED,
+//                 ({ socketId, username }) => {
+//                     toast.success(`${username} left the room.`);
+//                     setClients((prev) => {
+//                         return prev.filter(
+//                             (client) => client.socketId !== socketId
+//                         );
+//                     });
+//                 }
+//             );
+//         };
+//         init();
+//         return () => {
+//             socketRef.current.disconnect();
+//             socketRef.current.off(ACTIONS.JOINED);
+//             socketRef.current.off(ACTIONS.DISCONNECTED);
+//         };
+//     }, []);
+
+//     // const handleErrors = (e) => {
+//     //     console.log('Socket error:', e);
+//     //     toast.error('Socket connection failed, try again later.');
+//     //     navigate('/');
+//     // };
+
+//     // const handleCodeChange = (newCode) => {
+//     //     setCode(newCode);
+//     //     codeRef.current = newCode;
+        
+//     //     // Emit code change to other users
+//     //     socketRef.current.emit(ACTIONS.CODE_CHANGE, {
+//     //         roomId,
+//     //         code: newCode,
+//     //     });
+//     // };
+
+//     const copyRoomId = async () => {
+//         try {
+//             await navigator.clipboard.writeText(roomId);
+//             toast.success('Room ID has been copied to your clipboard');
+//         } catch (err) {
+//             toast.error('Could not copy the Room ID');
+//             console.error(err);
+//         }
+//     };
+
+//     const downloadCode = () => {
+//         const element = document.createElement('a');
+//         const file = new Blob([codeRef.current], { type: 'text/plain' });
+//         element.href = URL.createObjectURL(file);
+//         element.download = `code-${roomId}-${new Date().toISOString().slice(0, 10)}.txt`;
+//         document.body.appendChild(element);
+//         element.click();
+//         document.body.removeChild(element);
+//         toast.success('Code downloaded successfully!');
+//     };
+//     const [aiInput, setAiInput] = useState('');
+//     const handleAISuggestion = async () => {
+//         try {
+//             const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:4000';
+
+//             const fullPrompt = `${codeRef.current}\n\n// Instruction:\n${aiInput}`;
+
+//             const res = await axios.post(
+//                 `${backendUrl}/api/v1/ai/suggest`,
+//                 { prompt: fullPrompt },
+//                 { headers: { 'Content-Type': 'application/json' } }
+//             );
+
+//             const data = res.data;
+//             if (data.success) {
+//                 const newCode = codeRef.current + '\n' + data.suggestion;
+//                 // setCode(newCode);
+//                 codeRef.current = newCode;
+
+//                 // Update CodeMirror editor
+//                 // if (editorInstanceRef.current) {
+//                 //     editorInstanceRef.current.setValue(newCode);
+//                 // }
+
+//                 socketRef.current.emit(ACTIONS.CODE_CHANGE, {
+//                     roomId,
+//                     code: newCode,
+//                 });
+
+//                 toast.success('AI suggestion added');
+//                 setAiInput('');
+//             } else {
+//                 toast.error('AI failed: ' + data.message);
+//             }
+//         } catch (err) {
+//             console.error(err);
+//             toast.error('AI error occurred');
+//         }
+//     };
+
+//     const leaveRoom = () => {
+//         reactNavigator('/home');
+//     };
+
+//     if (!location.state) {
+//         reactNavigator('/');
+//         return null;
+//     }
+
+//     return (
+//         <div className="editorPageContainer">
+//             {/* Sidebar */}
+//             <div className="editorSidebar">
+//                 <div className="sidebarContent">
+//                     <div className="logoSection">
+//                         <img className="logoImage" src="/code-sync.png" alt="logo" />
+//                     </div>
+                    
+//                     <h3 className="connectedUsersTitle">Connected Users</h3>
+                    
+//                     <div className="clientsList">
+//                         {clients.map((client) => (
+//                             <div key={client.socketId} className="clientItem">
+//                                 <span>{client.username}</span>
+//                             </div>
+//                         ))}
+//                     </div>
+//                 </div>
+
+//                 <div className="sidebarButtons">
+//                     <button className="sidebarBtn copyBtn" onClick={copyRoomId}>
+//                         Copy Room ID
+//                     </button>
+                    
+//                     <button className="sidebarBtn downloadBtn" onClick={downloadCode}>
+//                         📥 Download Code
+//                     </button>
+                    
+//                     <button className="sidebarBtn leaveBtn" onClick={leaveRoom}>
+//                         Leave Room
+//                     </button>
+//                 </div>
+//             </div>
+
+//             {/* Main Editor Area */}
+//             <div className="editorMainArea">
+//                 {/* CodeMirror Editor */}
+//                 <div className="editorContainer">
+//                     <Editor 
+//                         socketRef={socketRef}
+//                         roomId={roomId}
+//                         onCodeChange={(code) => {
+//                         codeRef.current = code;
+//                     }}
+//                     />
+//                 </div>
+
+//                 {/* AI Input Section - Fixed at bottom */}
+//                 <div className="aiInputSection">
+//                     <textarea
+//                         value={aiInput}
+//                         onChange={(e) => setAiInput(e.target.value)}
+//                         placeholder="Describe what you want the AI to help with..."
+//                         className="aiTextarea"
+//                     />
+//                     <button 
+//                         onClick={handleAISuggestion}
+//                         disabled={!aiInput.trim()}
+//                         className="aiSuggestionBtn"
+//                     >
+//                         💡 Get AI Suggestion
+//                     </button>
+//                 </div>
+//             </div>
+//         </div>
+//     );
+// };
+
+// export default EditorPage;
+
+
+
 import React, { useState, useRef, useEffect } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { io } from 'socket.io-client';
 import toast from 'react-hot-toast';
-import ACTIONS from '../Actions';
-import Client from '../components/Client';
-import Editor from '../components/Editor';
-import { initSocket } from '../socket';
-import {
-    useLocation,
-    useNavigate,
-    Navigate,
-    useParams,
-} from 'react-router-dom';
 import axios from 'axios';
+import Editor from '../components/Editor'; // CodeMirror editor component
+
+const ACTIONS = {
+    JOIN: 'join',
+    JOINED: 'joined',
+    DISCONNECTED: 'disconnected',
+    CODE_CHANGE: 'code-change',
+    SYNC_CODE: 'sync-code',
+    LEAVE: 'leave',
+};
 
 const EditorPage = () => {
     const socketRef = useRef(null);
-    const codeRef = useRef(null);
+    const codeRef = useRef('');
+    const editorInstanceRef = useRef(null);
     const location = useLocation();
     const { roomId } = useParams();
-    const reactNavigator = useNavigate();
+    const navigate = useNavigate();
+
     const [clients, setClients] = useState([]);
+    const [code, setCode] = useState('// Welcome to the collaborative editor!\n');
+    const [aiInput, setAiInput] = useState('');
 
     useEffect(() => {
         const init = async () => {
-            socketRef.current = await initSocket();
-            socketRef.current.on('connect_error', (err) => handleErrors(err));
-            socketRef.current.on('connect_failed', (err) => handleErrors(err));
-
-            function handleErrors(e) {
-                console.log('socket error', e);
-                toast.error('Socket connection failed, try again later.');
-                reactNavigator('/');
-            }
-
+            socketRef.current = io(process.env.REACT_APP_SOCKET_URL || window.location.origin);
+            
+            socketRef.current.on('connect_error', handleErrors);
             socketRef.current.emit(ACTIONS.JOIN, {
                 roomId,
                 username: location.state?.username,
             });
 
-            // Listening for joined event
-            socketRef.current.on(
-                ACTIONS.JOINED,
-                ({ clients, username, socketId }) => {
-                    if (username !== location.state?.username) {
-                        toast.success(`${username} joined the room.`);
-                        console.log(`${username} joined`);
-                    }
-                    setClients(clients);
-                    socketRef.current.emit(ACTIONS.SYNC_CODE, {
-                        code: codeRef.current,
-                        socketId,
-                    });
+            socketRef.current.on(ACTIONS.JOINED, ({ clients, username, socketId }) => {
+                if (username !== location.state?.username) {
+                    toast.success(`${username} joined the room.`);
                 }
-            );
+                setClients(clients);
+                socketRef.current.emit(ACTIONS.SYNC_CODE, {
+                    socketId,
+                    code: codeRef.current,
+                });
+            });
 
-            // Listening for disconnected
-            socketRef.current.on(
-                ACTIONS.DISCONNECTED,
-                ({ socketId, username }) => {
-                    toast.success(`${username} left the room.`);
-                    setClients((prev) => {
-                        return prev.filter(
-                            (client) => client.socketId !== socketId
-                        );
-                    });
+            socketRef.current.on(ACTIONS.DISCONNECTED, ({ socketId, username }) => {
+                toast.success(`${username} left the room.`);
+                setClients((prev) => prev.filter(c => c.socketId !== socketId));
+            });
+
+            socketRef.current.on(ACTIONS.CODE_CHANGE, ({ code }) => {
+                if (code !== null && code !== codeRef.current) {
+                    codeRef.current = code;
+                    setCode(code);
+                    if (editorInstanceRef.current) {
+                        editorInstanceRef.current.setValue(code);
+                    }
                 }
-            );
+            });
         };
+
         init();
+
         return () => {
             socketRef.current.disconnect();
             socketRef.current.off(ACTIONS.JOINED);
             socketRef.current.off(ACTIONS.DISCONNECTED);
+            socketRef.current.off(ACTIONS.CODE_CHANGE);
         };
-    }, []);
+    }, [roomId, location.state?.username]);
 
-    // const handleErrors = (e) => {
-    //     console.log('Socket error:', e);
-    //     toast.error('Socket connection failed, try again later.');
-    //     navigate('/');
-    // };
+    const handleErrors = (err) => {
+        console.error('Socket error:', err);
+        toast.error('Socket connection failed, try again.');
+        navigate('/');
+    };
 
-    // const handleCodeChange = (newCode) => {
-    //     setCode(newCode);
-    //     codeRef.current = newCode;
-        
-    //     // Emit code change to other users
-    //     socketRef.current.emit(ACTIONS.CODE_CHANGE, {
-    //         roomId,
-    //         code: newCode,
-    //     });
-    // };
+    const handleCodeChange = (newCode) => {
+        setCode(newCode);
+        codeRef.current = newCode;
+        socketRef.current.emit(ACTIONS.CODE_CHANGE, {
+            roomId,
+            code: newCode,
+        });
+    };
+
+    const handleAISuggestion = async () => {
+        try {
+            const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:4000';
+            const prompt = `${codeRef.current}\n\n// Instruction:\n${aiInput}`;
+            const res = await axios.post(`${backendUrl}/api/v1/ai/suggest`, { prompt });
+
+            if (res.data.success) {
+                const newCode = `${codeRef.current}\n${res.data.suggestion}`;
+                handleCodeChange(newCode);
+                toast.success('AI suggestion added!');
+                setAiInput('');
+            } else {
+                toast.error('AI failed: ' + res.data.message);
+            }
+        } catch (err) {
+            console.error(err);
+            toast.error('Error fetching AI suggestion.');
+        }
+    };
 
     const copyRoomId = async () => {
         try {
             await navigator.clipboard.writeText(roomId);
-            toast.success('Room ID has been copied to your clipboard');
-        } catch (err) {
-            toast.error('Could not copy the Room ID');
-            console.error(err);
+            toast.success('Room ID copied!');
+        } catch {
+            toast.error('Failed to copy Room ID');
         }
     };
 
     const downloadCode = () => {
-        const element = document.createElement('a');
-        const file = new Blob([codeRef.current], { type: 'text/plain' });
-        element.href = URL.createObjectURL(file);
-        element.download = `code-${roomId}-${new Date().toISOString().slice(0, 10)}.txt`;
-        document.body.appendChild(element);
-        element.click();
-        document.body.removeChild(element);
-        toast.success('Code downloaded successfully!');
-    };
-    const [aiInput, setAiInput] = useState('');
-    const handleAISuggestion = async () => {
-        try {
-            const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:4000';
-
-            const fullPrompt = `${codeRef.current}\n\n// Instruction:\n${aiInput}`;
-
-            const res = await axios.post(
-                `${backendUrl}/api/v1/ai/suggest`,
-                { prompt: fullPrompt },
-                { headers: { 'Content-Type': 'application/json' } }
-            );
-
-            const data = res.data;
-            if (data.success) {
-                const newCode = codeRef.current + '\n' + data.suggestion;
-                // setCode(newCode);
-                codeRef.current = newCode;
-
-                // Update CodeMirror editor
-                // if (editorInstanceRef.current) {
-                //     editorInstanceRef.current.setValue(newCode);
-                // }
-
-                socketRef.current.emit(ACTIONS.CODE_CHANGE, {
-                    roomId,
-                    code: newCode,
-                });
-
-                toast.success('AI suggestion added');
-                setAiInput('');
-            } else {
-                toast.error('AI failed: ' + data.message);
-            }
-        } catch (err) {
-            console.error(err);
-            toast.error('AI error occurred');
-        }
+        const blob = new Blob([codeRef.current], { type: 'text/plain;charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `room-${roomId}.cpp`;
+        a.click();
     };
 
-    const leaveRoom = () => {
-        reactNavigator('/home');
-    };
+    const leaveRoom = () => navigate('/home');
 
     if (!location.state) {
-        reactNavigator('/');
+        navigate('/');
         return null;
     }
 
@@ -659,9 +866,7 @@ const EditorPage = () => {
                     <div className="logoSection">
                         <img className="logoImage" src="/code-sync.png" alt="logo" />
                     </div>
-                    
                     <h3 className="connectedUsersTitle">Connected Users</h3>
-                    
                     <div className="clientsList">
                         {clients.map((client) => (
                             <div key={client.socketId} className="clientItem">
@@ -670,36 +875,30 @@ const EditorPage = () => {
                         ))}
                     </div>
                 </div>
-
                 <div className="sidebarButtons">
                     <button className="sidebarBtn copyBtn" onClick={copyRoomId}>
                         Copy Room ID
                     </button>
-                    
                     <button className="sidebarBtn downloadBtn" onClick={downloadCode}>
                         📥 Download Code
                     </button>
-                    
                     <button className="sidebarBtn leaveBtn" onClick={leaveRoom}>
                         Leave Room
                     </button>
                 </div>
             </div>
 
-            {/* Main Editor Area */}
+            {/* Editor Main Area */}
             <div className="editorMainArea">
-                {/* CodeMirror Editor */}
                 <div className="editorContainer">
-                    <Editor 
-                        socketRef={socketRef}
-                        roomId={roomId}
-                        onCodeChange={(code) => {
-                        codeRef.current = code;
-                    }}
+                    <Editor
+                        initialCode={code}
+                        onCodeChange={handleCodeChange}
+                        editorRef={editorInstanceRef}
                     />
                 </div>
 
-                {/* AI Input Section - Fixed at bottom */}
+                {/* AI Suggestion Input */}
                 <div className="aiInputSection">
                     <textarea
                         value={aiInput}
@@ -707,7 +906,7 @@ const EditorPage = () => {
                         placeholder="Describe what you want the AI to help with..."
                         className="aiTextarea"
                     />
-                    <button 
+                    <button
                         onClick={handleAISuggestion}
                         disabled={!aiInput.trim()}
                         className="aiSuggestionBtn"

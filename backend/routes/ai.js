@@ -19,12 +19,12 @@ router.post('/suggest', async (req, res) => {
   try {
     // Use the newer API structure with ai.models.generateContent
     const response = await ai.models.generateContent({
-      model: "gemini-1.5-flash", // or "gemini-2.5-flash" if available
+      model: "gemini-2.5-flash",
       contents: prompt,
       config: {
         thinkingConfig: {
-          thinkingBudget: 0, // Disables thinking for faster responses
-        }
+          thinkingBudget: 0, // Disables thinking
+        },
       }
     });
 

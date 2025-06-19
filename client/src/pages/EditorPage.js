@@ -501,6 +501,7 @@ import {
     Navigate,
     useParams,
 } from 'react-router-dom';
+import axios from 'axios';
 
 const EditorPage = () => {
     const socketRef = useRef(null);
@@ -601,7 +602,7 @@ const EditorPage = () => {
         document.body.removeChild(element);
         toast.success('Code downloaded successfully!');
     };
-
+    const [aiInput, setAiInput] = useState('');
     const handleAISuggestion = async () => {
         try {
             const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:4000';
@@ -617,13 +618,13 @@ const EditorPage = () => {
             const data = res.data;
             if (data.success) {
                 const newCode = codeRef.current + '\n' + data.suggestion;
-                setCode(newCode);
+                // setCode(newCode);
                 codeRef.current = newCode;
 
                 // Update CodeMirror editor
-                if (editorInstanceRef.current) {
-                    editorInstanceRef.current.setValue(newCode);
-                }
+                // if (editorInstanceRef.current) {
+                //     editorInstanceRef.current.setValue(newCode);
+                // }
 
                 socketRef.current.emit(ACTIONS.CODE_CHANGE, {
                     roomId,
@@ -642,11 +643,11 @@ const EditorPage = () => {
     };
 
     const leaveRoom = () => {
-        navigate('/home');
+        reactNavigator('/home');
     };
 
     if (!location.state) {
-        navigate('/');
+        reactNavigator('/');
         return null;
     }
 
@@ -690,9 +691,11 @@ const EditorPage = () => {
                 {/* CodeMirror Editor */}
                 <div className="editorContainer">
                     <Editor 
-                        value={code}
-                        onChange={handleCodeChange}
-                        editorRef={editorInstanceRef}
+                        socketRef={socketRef}
+                        roomId={roomId}
+                        onCodeChange={(code) => {
+                        codeRef.current = code;
+                    }}
                     />
                 </div>
 

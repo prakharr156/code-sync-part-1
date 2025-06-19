@@ -5,6 +5,64 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import toast from 'react-hot-toast';
 import axios from 'axios';
+import CodeMirror from '@uiw/react-codemirror';
+import { cpp } from '@codemirror/lang-cpp';
+import { dracula } from '@uiw/codemirror-theme-dracula'; 
+import CodeMirror from '@uiw/react-codemirror';
+import { cpp } from '@codemirror/lang-cpp';
+import { dracula } from '@uiw/codemirror-theme-dracula';
+import { defaultKeymap, history } from '@codemirror/commands';
+import { closeBrackets, closeBracketsKeymap } from '@codemirror/autocomplete';
+import { autocompletion } from '@codemirror/autocomplete';
+import { foldGutter, indentOnInput, syntaxTree } from '@codemirror/language';
+import { highlightActiveLine, lineNumbers } from '@codemirror/view';
+import { EditorView } from '@codemirror/view';
+import { keymap } from '@codemirror/view';
+import { lintGutter, linter } from '@codemirror/lint';
+
+function cppLint(view) {
+  const diagnostics = [];
+  const tree = syntaxTree(view.state);
+  const code = view.state.doc.toString();
+
+  tree.iterate({
+    enter: ({ type, from, to }) => {
+      if (type.name === 'UnterminatedString') {
+        diagnostics.push({
+          from,
+          to,
+          severity: 'error',
+          message: 'Unterminated string detected',
+        });
+      }
+      if (type.name === 'VariableDefinition') {
+        const text = code.slice(from, to);
+        if (/int\s+\w+\s*$/.test(text)) {
+          diagnostics.push({
+            from,
+            to,
+            severity: 'warning',
+            message: 'Possibly missing semicolon in variable declaration',
+          });
+        }
+      }
+      if (type.name === 'Identifier') {
+        const text = code.slice(from, to);
+        if (text === 'undeclaredVar') {
+          diagnostics.push({
+            from,
+            to,
+            severity: 'error',
+            message: 'Undeclared variable used: ' + text,
+          });
+        }
+      }
+    },
+  });
+
+  return diagnostics;
+}
+
 
 const ACTIONS = {
     JOIN: 'join',
@@ -197,7 +255,7 @@ const EditorPage = () => {
             {/* Main Editor Area */}
             <div className="editorMainArea">
                 {/* CodeMirror Editor */}
-                <div className="editorContainer">
+                {/* <div className="editorContainer">
                     <textarea
                     value={code}
                     onChange={(e) => handleCodeChange(e.target.value)}
@@ -215,7 +273,36 @@ const EditorPage = () => {
                         resize: 'none'
                     }}
                 />
-                </div>
+                </div> */}
+                <div className="editorContainer">
+                    <CodeMirror
+                        value={code}
+                        height="100%"
+                        extensions={[
+                        cpp(),
+                        lineNumbers(),
+                        highlightActiveLine(),
+                        foldGutter(),
+                        closeBrackets(),
+                        autocompletion(),
+                        indentOnInput(),
+                        history(),
+                        lintGutter(),
+                        linter(cppLint),
+                        keymap.of([...closeBracketsKeymap, ...defaultKeymap]),
+                        EditorView.lineWrapping
+                        ]}
+                        theme={dracula}
+                        onChange={(value) => handleCodeChange(value)}
+                        style={{
+                        fontSize: '16px',
+                        fontFamily: 'monospace',
+                        backgroundColor: '#1e1e1e',
+                        }}
+                    />
+                    </div>
+
+
 
                 {/* AI Input Section - Fixed at bottom */}
                 <div className="aiInputSection">

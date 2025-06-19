@@ -112,13 +112,13 @@ const EditorPage = () => {
 
         const fullPrompt = `${codeRef.current}\n\n// Instruction:\n${aiInput}`;
 
-        const res = await fetch(`${backendUrl}/api/v1/ai/suggest`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prompt: fullPrompt }),
-        });
+        const res = await axios.post(
+            `${backendUrl}/api/v1/ai/suggest`,
+            { prompt: fullPrompt },
+            { headers: { 'Content-Type': 'application/json' } }
+        );
 
-        const data = await res.json();
+        const data = res.data;
         if (data.success) {
             const newCode = codeRef.current + '\n' + data.suggestion;
             setCode(newCode);
@@ -174,7 +174,7 @@ const EditorPage = () => {
 
 
 
-                <button className="btn" onClick={handleAISuggestion}>💡 Get AI Suggestion</button>
+                {/* <button className="btn" onClick={handleAISuggestion}>💡 Get AI Suggestion</button> */}
 
 
 

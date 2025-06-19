@@ -1,63 +1,57 @@
 import React, { useEffect, useRef } from 'react';
-import CodeMirror from 'codemirror';
+import Codemirror from 'codemirror';
 import 'codemirror/lib/codemirror.css';
+import 'codemirror/theme/dracula.css';
 import 'codemirror/mode/clike/clike'; // Import for C++
-import 'codemirror/theme/material.css';
+import 'codemirror/addon/edit/closetag';
+import 'codemirror/addon/edit/closebrackets';
+import ACTIONS from '../Actions';
 
-const Editor = ({ onChange, value, editorRef }) => {
-  const editorContainerRef = useRef(null);
-  const editorInstance = useRef(null);
+const Editor = ({ socketRef, roomId, onCodeChange }) => {
+    const editorRef = useRef(null);
+    useEffect(() => {
+        async function init() {
+            editorRef.current = Codemirror.fromTextArea(
+                document.getElementById('realtimeEditor'),
+                {
+                    mode: 'text/x-c++src',
+                    theme: 'material',
+                    autoCloseTags: true,
+                    autoCloseBrackets: true,
+                    lineNumbers: true,
+                }
+            );
 
-  useEffect(() => {
-    if (!editorContainerRef.current) return;
+            editorRef.current.on('change', (instance, changes) => {
+                const { origin } = changes;
+                const code = instance.getValue();
+                onCodeChange(code);
+                if (origin !== 'setValue') {
+                    socketRef.current.emit(ACTIONS.CODE_CHANGE, {
+                        roomId,
+                        code,
+                    });
+                }
+            });
+        }
+        init();
+    }, []);
 
-    editorInstance.current = CodeMirror(editorContainerRef.current, {
-      mode: 'text/x-c++src', // C++ mode
-      theme: 'material',
-      lineNumbers: true,
-      lineWrapping: true,
-      autoCloseBrackets: true,
-      matchBrackets: true,
-      indentUnit: 4, // C++ typically uses 4 spaces
-      tabSize: 4,
-      value: value || '',
-    });
+    useEffect(() => {
+        if (socketRef.current) {
+            socketRef.current.on(ACTIONS.CODE_CHANGE, ({ code }) => {
+                if (code !== null) {
+                    editorRef.current.setValue(code);
+                }
+            });
+        }
 
-    editorInstance.current.on('change', (instance) => {
-      const code = instance.getValue();
-      onChange(code);
-    });
+        return () => {
+            socketRef.current.off(ACTIONS.CODE_CHANGE);
+        };
+    }, [socketRef.current]);
 
-    if (editorRef) {
-      editorRef.current = editorInstance.current;
-    }
-
-    return () => {
-      if (editorInstance.current) {
-        editorInstance.current.toTextArea();
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    if (editorInstance.current && value !== undefined) {
-      const currentValue = editorInstance.current.getValue();
-      if (currentValue !== value) {
-        editorInstance.current.setValue(value);
-      }
-    }
-  }, [value]);
-
-  return (
-    <div 
-      ref={editorContainerRef} 
-      style={{ 
-        height: '100%',
-        width: '100%',
-        fontSize: '14px',
-      }} 
-    />
-  );
+    return <textarea id="realtimeEditor"></textarea>;
 };
 
 export default Editor;

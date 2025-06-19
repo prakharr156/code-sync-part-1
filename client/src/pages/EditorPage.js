@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import toast from 'react-hot-toast';
+import axios from 'axios';
 
 const ACTIONS = {
     JOIN: 'join',

@@ -106,7 +106,7 @@ const EditorPage = () => {
     };
 
     const leaveRoom = () => {
-        navigate('/');
+        navigate('/home');
     };
 
     if (!location.state) {

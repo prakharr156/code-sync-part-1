@@ -5,13 +5,19 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import toast from 'react-hot-toast';
 import axios from 'axios';
-import CodeMirror from '@uiw/react-codemirror';
-import { cpp } from '@codemirror/lang-cpp';
-import { defaultKeymap } from '@codemirror/commands';
-import { EditorView, keymap } from '@codemirror/view';
-import { dracula } from '@uiw/codemirror-theme-dracula';
-import { closeBrackets, closeBracketsKeymap } from '@codemirror/autocomplete';
-import { lineNumbers } from '@codemirror/view';
+import { Controlled as CodeMirror } from 'react-codemirror2';
+// or
+// import { UnControlled as CodeMirror } from 'react-codemirror2';
+
+// Then your CSS and mode imports
+import 'codemirror/lib/codemirror.css';
+import 'codemirror/theme/dracula.css';
+import 'codemirror/mode/clike/clike';
+import 'codemirror/addon/edit/closebrackets';
+import 'codemirror/addon/display/placeholder';
+import 'codemirror/addon/fold/foldcode';
+import 'codemirror/addon/fold/foldgutter.css';
+import 'codemirror/addon/fold/foldgutter';
 
 
 
@@ -226,7 +232,7 @@ const EditorPage = () => {
                 />
                 </div> */}
                 <div className="editorContainer">
-                        <CodeMirror
+                        {/* <CodeMirror
                         value={code}
                         height="100%"
                         extensions={[
@@ -239,7 +245,29 @@ const EditorPage = () => {
                         ]}
                         onChange={(value) => handleCodeChange(value)}
                         style={{ fontSize: '16px', fontFamily: 'monospace' }}
-                        />
+                        /> */}
+                        <CodeMirror
+  value={code}
+  options={{
+    mode: 'text/x-c++src',
+    theme: 'dracula',
+    lineNumbers: true,
+    autoCloseBrackets: true,
+    matchBrackets: true,
+    lineWrapping: true,
+    indentUnit: 4,
+    tabSize: 4,
+    indentWithTabs: false,
+    foldGutter: true, // Enable code folding
+    gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter'],
+    extraKeys: {
+      'Ctrl-Space': 'autocomplete',
+      'Tab': 'indentMore',
+      'Shift-Tab': 'indentLess'
+    }
+  }}
+  onBeforeChange={(editor, data, value) => handleCodeChange(value)}
+/>
                     </div>
 
 

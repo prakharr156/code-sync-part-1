@@ -22,6 +22,13 @@ require("./config/database").connect()
 const user = require("./routes/user");
 app.use("/api/v1/auth",user);
 
+
+const aiRoutes = require('./routes/ai');
+app.use('/api/v1/ai', aiRoutes);
+
+
+
+
 // Activate 
 app.listen(PORT,() => {
     console.log("Server Run at ",PORT);

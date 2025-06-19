@@ -105,6 +105,34 @@ const EditorPage = () => {
         }
     };
 
+    const handleAISuggestion = async () => {
+        try {
+            const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:4000';
+            const res = await fetch(`${backendUrl}/api/v1/ai/suggest`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt: codeRef.current }),
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                const newCode = codeRef.current + '\n' + data.suggestion;
+                setCode(newCode);
+                codeRef.current = newCode;
+
+                socketRef.current.emit(ACTIONS.CODE_CHANGE, {
+                    roomId,
+                    code: newCode,
+                });
+            } else {
+                toast.error('AI failed: ' + data.message);
+            }
+        } catch (err) {
+            console.error(err);
+            toast.error('AI error occurred');
+        }
+    };
+
     const leaveRoom = () => {
         navigate('/home');
     };
@@ -136,6 +164,13 @@ const EditorPage = () => {
                 <button className="btn leaveBtn" onClick={leaveRoom}>
                     Leave
                 </button>
+
+
+
+                <button className="btn" onClick={handleAISuggestion}>💡 Get AI Suggestion</button>
+
+
+
             </div>
             <div className="editorWrap">
                 <textarea

@@ -1,34 +1,40 @@
-// backend/routes/ai.js
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const fetch = require('node-fetch');
+const axios = require('axios');
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-
+// POST /api/v1/ai/suggest
 router.post('/suggest', async (req, res) => {
-    const { prompt } = req.body;
+  const { prompt } = req.body;
 
-    if (!prompt) {
-        return res.status(400).json({ success: false, message: "No prompt provided" });
-    }
+  try {
+    // Call external AI suggestion API (example: Gemini, OpenAI, etc.)
+    const apiKey = process.env.AI_API_KEY; // Make sure you set this in .env
+    const response = await axios.post(
+      'https://api.example.com/generate', // <-- replace with your actual AI API
+      {
+        prompt: prompt,
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`
+        }
+      }
+    );
 
-    try {
-        const result = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: prompt }] }],
-            }),
-        });
+    const suggestion = response.data.suggestion || response.data.choices?.[0]?.text;
 
-        const data = await result.json();
-
-        const suggestion = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-        res.json({ success: true, suggestion });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ success: false, message: "AI API failed" });
-    }
+    res.json({
+      success: true,
+      suggestion,
+    });
+  } catch (err) {
+    console.error('AI Suggestion Error:', err.response?.data || err.message);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch AI suggestion',
+    });
+  }
 });
 
 module.exports = router;

@@ -104,34 +104,41 @@ const EditorPage = () => {
             console.error(err);
         }
     };
+    const [aiInput, setAiInput] = useState('');
 
     const handleAISuggestion = async () => {
-        try {
-            const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:4000';
-            const res = await fetch(`${backendUrl}/api/v1/ai/suggest`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt: codeRef.current }),
+    try {
+        const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:4000';
+
+        const fullPrompt = `${codeRef.current}\n\n// Instruction:\n${aiInput}`;
+
+        const res = await fetch(`${backendUrl}/api/v1/ai/suggest`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt: fullPrompt }),
+        });
+
+        const data = await res.json();
+        if (data.success) {
+            const newCode = codeRef.current + '\n' + data.suggestion;
+            setCode(newCode);
+            codeRef.current = newCode;
+
+            socketRef.current.emit(ACTIONS.CODE_CHANGE, {
+                roomId,
+                code: newCode,
             });
 
-            const data = await res.json();
-            if (data.success) {
-                const newCode = codeRef.current + '\n' + data.suggestion;
-                setCode(newCode);
-                codeRef.current = newCode;
-
-                socketRef.current.emit(ACTIONS.CODE_CHANGE, {
-                    roomId,
-                    code: newCode,
-                });
-            } else {
-                toast.error('AI failed: ' + data.message);
-            }
-        } catch (err) {
-            console.error(err);
-            toast.error('AI error occurred');
+            toast.success('AI suggestion added');
+            setAiInput(''); // clear input
+        } else {
+            toast.error('AI failed: ' + data.message);
         }
-    };
+    } catch (err) {
+        console.error(err);
+        toast.error('AI error occurred');
+    }
+};
 
     const leaveRoom = () => {
         navigate('/home');
@@ -190,6 +197,41 @@ const EditorPage = () => {
                         resize: 'none'
                     }}
                 />
+
+
+
+                <div style={{ marginTop: '10px' }}>
+        <textarea
+            value={aiInput}
+            onChange={(e) => setAiInput(e.target.value)}
+            placeholder="Describe what you want the AI to help with..."
+            style={{
+                width: '100%',
+                height: '80px',
+                padding: '10px',
+                fontSize: '14px',
+                fontFamily: 'monospace',
+                backgroundColor: '#2e2e2e',
+                color: '#eee',
+                border: '1px solid #444',
+                borderRadius: '4px'
+            }}
+        />
+        <button onClick={handleAISuggestion} style={{
+            marginTop: '8px',
+            padding: '8px 16px',
+            backgroundColor: '#4caf50',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer'
+        }}>
+            Get AI Suggestion
+        </button>
+    </div>
+
+
+
             </div>
         </div>
     );
